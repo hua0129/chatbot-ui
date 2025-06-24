@@ -2,3 +2,13 @@ node_modules/
 venv/
 dist/
 __pycache__/
+
+.env
+*.swp
+.python-version
+*.log
+*.pyc
+*.pyo
+*.pyd
+.idea
+*.bak

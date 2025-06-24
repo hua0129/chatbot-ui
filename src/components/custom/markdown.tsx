@@ -1,9 +1,129 @@
-import { memo } from "react";
+import { memo, useState, useEffect } from "react"; // Added useState, useEffect
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+// --- Artifact Rendering Constants and Mock Data ---
+const ARTIFACT_PREFIX = "render-as-artifact:";
+const MOCK_URL = "https://example.com/my-article";
+const MOCK_HTML_CONTENT = `
+  <body style="font-family: sans-serif; padding: 16px; background-color: #f0f0f0;">
+    <h1>Mock Article Title</h1>
+    <p>This is the mock content of the article fetched from <code>${MOCK_URL}</code>.</p>
+    <p>It demonstrates how a fetched HTML page might be rendered in an iframe.</p>
+    <button onclick="alert('Scripts are running!')">Test Interaction (if sandbox allows)</button>
+  </body>
+`;
+
+// --- ArtifactRenderer Component ---
+const ArtifactRenderer = ({ url }: { url: string }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [fetchedContent, setFetchedContent] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    setFetchedContent(null);
+
+    // Simulate fetching delay
+    const timer = setTimeout(() => {
+      if (url === MOCK_URL) {
+        setFetchedContent(MOCK_HTML_CONTENT);
+      } else {
+        setError(`Cannot render artifact for this URL. Only '${MOCK_URL}' is supported for mock fetching.`);
+      }
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [url]);
+
+  if (loading) {
+    return (
+      <div className="p-4 border rounded-lg bg-muted/50 dark:bg-muted/30 text-sm text-muted-foreground animate-pulse">
+        Loading artifact: {url}...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 border border-red-500/50 rounded-lg bg-red-500/10 text-sm text-red-700 dark:text-red-400">
+        Error: {error}
+      </div>
+    );
+  }
+
+  if (fetchedContent) {
+    return (
+      <div className="my-2 p-2 border rounded-lg bg-muted/20 dark:bg-muted/10">
+        <p className="text-xs text-muted-foreground mb-1">Rendering artifact: {url}</p>
+        <iframe
+          srcDoc={fetchedContent}
+          sandbox="allow-scripts allow-same-origin" // Be cautious with sandbox permissions
+          className="w-full h-64 border rounded-md bg-white"
+          title={`Artifact: ${url}`}
+        />
+      </div>
+    );
+  }
+
+  return null; // Should not happen if logic is correct
+};
+
+import React from "react"; // Import React for Fragment
+
+// ... (ArtifactRenderer and constants remain the same) ...
+
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
   const components = {
+    p: ({ node, children, ...props }: any) => {
+      const processedChildren: React.ReactNode[] = [];
+
+      const childrenArray = React.Children.toArray(children);
+
+      childrenArray.forEach((child, childIndex) => {
+        if (typeof child === 'string') {
+          const textContent = child;
+          let lastIndex = 0;
+          let match;
+          // Ensure ARTIFACT_PREFIX is properly escaped for regex if it contains special characters
+          const escapedPrefix = ARTIFACT_PREFIX.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(escapedPrefix + "([^\\s]+)", 'g');
+
+          while ((match = regex.exec(textContent)) !== null) {
+            // Add text before the match
+            if (match.index > lastIndex) {
+              processedChildren.push(textContent.substring(lastIndex, match.index));
+            }
+            // Add the ArtifactRenderer
+            const url = match[1];
+            // Use a more robust key, including childIndex to ensure uniqueness across different original children
+            processedChildren.push(<ArtifactRenderer key={`artifact-${childIndex}-${match.index}-${url}`} url={url} />);
+            lastIndex = regex.lastIndex;
+          }
+          // Add any remaining text after the last match
+          if (lastIndex < textContent.length) {
+            processedChildren.push(textContent.substring(lastIndex));
+          }
+        } else {
+          // If it's already a React element (e.g., <strong>, <a>), push it as is.
+          processedChildren.push(child);
+        }
+      });
+
+      // If processedChildren is empty, it means the original paragraph was empty or contained only unsupported elements.
+      // In this case, falling back to original children is safer.
+      // However, our loop processes all children, so processedChildren should represent the full content.
+      if (processedChildren.length > 0) {
+         // Using React.Fragment for keys when mapping an array of mixed elements/strings
+        return <p {...props}>{processedChildren.map((pChild, i) => <React.Fragment key={i}>{pChild}</React.Fragment>)}</p>;
+      }
+      
+      // Fallback for empty or fully non-string children paragraphs (though the loop should handle it)
+      return <p {...props}>{children}</p>;
+    },
+    // Keep other custom components or add new ones
     code: ({ node, inline, className, children, ...props }: any) => {
       const match = /language-(\w+)/.exec(className || "");
       return !inline && match ? (

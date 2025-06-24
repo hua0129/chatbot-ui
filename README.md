@@ -29,6 +29,27 @@ npm i
 npm run dev
 ```
 
+### Configuring the Agent API Endpoint
+
+The `sessionManager.ts` uses an API endpoint to create and manage user sessions on the backend. By default, this is set to `http://localhost:8000`.
+To configure the frontend to use a different backend API endpoint for session management, you can set the `VITE_AGENT_API_BASE_URL` environment variable before building or running the development server.
+
+For example, you can create a `.env` file in the project root directory with the following content:
+
+```
+VITE_AGENT_API_BASE_URL=http://your-actual-backend.com
+```
+
+This would make the session manager connect to `http://your-actual-backend.com/apps/...` for session operations.
+
+Alternatively, you can set the variable directly when running the development server:
+
+```bash
+VITE_AGENT_API_BASE_URL=http://your-actual-backend.com npm run dev
+```
+
+If `VITE_AGENT_API_BASE_URL` is set, it will be used as the base URL for session management API calls. Otherwise, it defaults to `http://localhost:8000`.
+
 ## Test Mode
 
 The project includes a test backend for development and testing purposes. To use the test mode:

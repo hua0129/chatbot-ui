@@ -69,6 +69,10 @@ export default {
           ring: 'hsl(var(--sidebar-ring))',
         },
       },
+      maxWidth: {
+        'screen-3xl': '1920px',
+        'screen-4xl': '2560px',
+      },
     },
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],

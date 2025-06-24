@@ -1,0 +1,13 @@
+[project]
+name = "chatbot-ui"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dotenv>=0.9.9",
+    "fastapi>=0.115.12",
+    "requests>=2.32.3",
+    "uvicorn>=0.34.2",
+    "websockets>=15.0.1",
+]

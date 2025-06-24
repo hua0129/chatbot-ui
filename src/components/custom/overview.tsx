@@ -1,7 +1,12 @@
 import { motion } from 'framer-motion';
 import { MessageCircle, BotIcon } from 'lucide-react';
 
-export const Overview = () => {
+interface OverviewProps {
+  title?: string;
+  description?: string; // Keeping it simple, not trying to parse HTML from string yet
+}
+
+export const Overview = ({ title, description }: OverviewProps) => {
   return (
     <>
     <motion.div
@@ -19,9 +24,9 @@ export const Overview = () => {
           <MessageCircle size={44}/>
         </p>
         <p>
-          Welcome to <strong>chatbot-ui</strong><br />
-          a open source template made by<br />
-          <strong>Leon Binder</strong> and <strong>Christoph Handschuh</strong>.
+          {title || <>Welcome to <strong>chatbot-ui</strong></>}
+          <br />
+          {description || <>a open source template made by<br /><strong>Leon Binder</strong> and <strong>Christoph Handschuh</strong>.</>}
         </p>
       </div>
     </motion.div>

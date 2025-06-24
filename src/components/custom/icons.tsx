@@ -17,6 +17,27 @@ export const BotIcon = () => {
   );
 };
 
+export const FileTextIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    strokeLinejoin="round"
+    viewBox="0 0 24 24" // Adjust viewBox if needed based on actual lucide icon
+    width={size}
+    fill="none" // Common for lucide icons
+    stroke="currentColor" // Common for lucide icons
+    strokeWidth="2" // Common for lucide icons
+    strokeLinecap="round" // Common for lucide icons
+    style={{ color: 'currentcolor' }}
+  >
+    {/* Actual SVG path for FileText from lucide-react */}
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+    <line x1="10" y1="9" x2="8" y2="9"/>
+  </svg>
+);
+
 export const UserIcon = () => {
   return (
     <svg
